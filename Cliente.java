@@ -36,27 +36,27 @@ public class Cliente {
                             break;
                         case "1":
                             if (splittedMsg.length < 2)
-                                throw new IOException("Invalid message params");
+                                throw new IOException("Parâmetros de mensagem inválidos");
                             System.out.println("Usuários online: " + translateUsers(splittedMsg[1]));
                             break;
                         case "2":
                             if (splittedMsg.length < 3)
-                                throw new IOException("Invalid message params");
-                            System.out.println(translateUser(splittedMsg[1]) + " said: " + splittedMsg[2]);
+                                throw new IOException("Parâmetros de mensagem inválidos");
+                            System.out.println(translateUser(splittedMsg[1]) + " disse: " + splittedMsg[2]);
                             break;
                         case "3":
                             if (splittedMsg.length < 2)
-                                throw new IOException("Invalid message params");
+                                throw new IOException("Parâmetros de mensagem inválidos");
                             System.out.println("Usuário " + translateUser(splittedMsg[1]) + " se conectou");
                             break;
                         default:
-                            throw new IOException("Message protocol identifier undefined");
+                            throw new IOException("Identificador de protocolo de mensagem indefinido");
                     }
                 }
             } catch (IOException e) {
                 System.out.println("Erro ao receber mensagem: " + e.getMessage());
             } catch (TimeoutException e){
-                System.out.println("System timed out: " + e.getMessage());
+                System.out.println("Tempo limite atingido: " + e.getMessage());
             }
         });
 
@@ -108,9 +108,9 @@ public class Cliente {
                     result = splittedResponseString[1];
                 else retryCounter++;
             }
-            if(shouldRetry && retryCounter >= 10) throw new TimeoutException("Unable to get a response from UDP server");
+            if(shouldRetry && retryCounter >= 10) throw new TimeoutException("Não foi possível obter resposta do servidor UDP");
         } catch (IOException e) {
-            System.out.println("Unable to reach UDP Server: " + e.getMessage());
+            System.out.println("Não foi possível alcançar o servidor UDP: " + e.getMessage());
         }
         return result;
     }
