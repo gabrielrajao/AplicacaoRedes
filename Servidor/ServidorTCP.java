@@ -120,6 +120,7 @@ public class ServidorTCP implements Runnable {
                 } catch (IOException e) {
                     System.out.println("Erro ao fechar a conexão: " + e.getMessage());
                 }
+                sendMessageUDP("2\u001F" + clienteId + "\u001F");
                 synchronized (clientes) {
                     int idx = clientesIdentifiers.indexOf(clientId);
                     if (idx >= 0) {
@@ -131,5 +132,38 @@ public class ServidorTCP implements Runnable {
                 System.out.println("Cliente desconectado: " + conexao.getInetAddress().getHostAddress());
             }
         }
+    }
+
+    public static String sendMessageUDP(String message) throws TimeoutException{
+        String result = "";
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            int retryCounter = 0;
+            boolean shouldRetry = true;
+
+            while (retryCounter < 10 && shouldRetry) {
+
+                byte[] messageBuffer = message.getBytes();
+                DatagramPacket pacoteEnvio = new DatagramPacket(messageBuffer, messageBuffer.length,
+                        InetAddress.getByName(InetAddress.getLocalHost().getHostAddress()), portaServidorUDP);
+                socket.send(pacoteEnvio);
+
+                byte[] bufferResposta = new byte[1024];
+                DatagramPacket pacoteRecebido = new DatagramPacket(bufferResposta, bufferResposta.length);
+                socket.receive(pacoteRecebido);
+
+                String responseString = new String(pacoteRecebido.getData(), 0, pacoteRecebido.getLength());
+                String[] splittedResponseString = responseString.split("\u001F");
+
+                shouldRetry = splittedResponseString[0].equals("OK") == false;
+                if (shouldRetry == false)
+                    result = splittedResponseString[1];
+                else retryCounter++;
+            }
+            if(shouldRetry && retryCounter >= 10) throw new TimeoutException("Não foi possível obter resposta do servidor UDP");
+        } catch (IOException e) {
+            System.out.println("Não foi possível alcançar o servidor UDP: " + e.getMessage());
+        }
+        return result;
     }
 }
