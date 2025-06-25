@@ -1,5 +1,8 @@
 package Servidor;
 
+import java.io.*;
+import java.net.*;
+import java.util.concurrent.TimeoutException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ServidorTCP implements Runnable {
+    private static final int portaServidorUDP = 9876; // Porta do servidorUDP
     private static final int portaServidorTCP = 6789;
     private static final List<PrintWriter> clientes = new ArrayList<>(); // Lista de clientes conectados
     private static final List<String> clientesIdentifiers = new ArrayList<>();
@@ -117,10 +121,13 @@ public class ServidorTCP implements Runnable {
                 String clientId = conexao.getInetAddress().getHostAddress() + ":" + conexao.getPort();
                 try {
                     conexao.close();
+                    sendMessageUDP("2\u001F" + clientId + "\u001F");
                 } catch (IOException e) {
                     System.out.println("Erro ao fechar a conexão: " + e.getMessage());
+                } catch (TimeoutException e){
+                    System.out.println("Não foi possível alcançar o servidor UDP: " + e.getMessage());
                 }
-                sendMessageUDP("2\u001F" + clienteId + "\u001F");
+                
                 synchronized (clientes) {
                     int idx = clientesIdentifiers.indexOf(clientId);
                     if (idx >= 0) {
