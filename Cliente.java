@@ -3,7 +3,6 @@ import java.net.*;
 import java.util.concurrent.TimeoutException;
 
 public class Cliente {
-    private static String servidor = "localhost"; // Endereço do servidor
     private static int portaServidorTCP = 6789; // Porta do servidorTCP
     private static int portaServidorUDP = 9876; // Porta do servidorUDP
 
@@ -19,7 +18,7 @@ public class Cliente {
 
         // Conecta-se ao servidor
         socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), portaServidorTCP));
-        System.out.println("Conectado ao servidor: " + servidor);
+        System.out.println("Conectado ao servidor: " + InetAddress.getLocalHost());
 
         // Cria os fluxos de entrada e saída do servidor TCP
         BufferedReader entradaServidor = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -94,7 +93,7 @@ public class Cliente {
 
                 byte[] messageBuffer = message.getBytes();
                 DatagramPacket pacoteEnvio = new DatagramPacket(messageBuffer, messageBuffer.length,
-                        InetAddress.getByName(servidor), portaServidorUDP);
+                        InetAddress.getByName(InetAddress.getLocalHost().getHostAddress()), portaServidorUDP);
                 socket.send(pacoteEnvio);
 
                 byte[] bufferResposta = new byte[1024];
