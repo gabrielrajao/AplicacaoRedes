@@ -14,6 +14,27 @@ public class ServidorTCP implements Runnable {
     private static final List<PrintWriter> clientes = new ArrayList<>(); // Lista de clientes conectados
     private static final List<String> clientesIdentifiers = new ArrayList<>();
 
+    private void broadcastUsuariosOnline() {
+        synchronized (clientes) {
+            StringBuilder mensagem = new StringBuilder();
+            if (clientesIdentifiers.size() > 0) {
+                mensagem.append("1\u001F");
+                boolean fazVirgula = false;
+                for (String id : clientesIdentifiers) {
+                    if (fazVirgula)
+                        mensagem.append(",");
+                    fazVirgula = true;
+                    mensagem.append(id);
+                }
+            } else {
+                mensagem.append("0");
+            }
+            for (PrintWriter cliente : clientes) {
+                cliente.println(mensagem.toString());
+            }
+        }
+    }
+
     public void run() {
         ServerSocket socket = null;
         try {
@@ -24,26 +45,11 @@ public class ServidorTCP implements Runnable {
                 System.out.println("Novo cliente conectado: " + conexao.getInetAddress().getHostAddress() + ":"
                         + conexao.getPort());
 
-                // Adiciona o cliente à lista de clientes
                 synchronized (clientes) {
                     clientes.add(new PrintWriter(conexao.getOutputStream(), true));
-                    String mensagemInicial = "0";
-                    if (clientesIdentifiers.size() > 0) {
-                        mensagemInicial = "1\u001F";
-                        boolean fazVirgula = false;
-                        for (String id : clientesIdentifiers) {
-                            if (fazVirgula)
-                                mensagemInicial += ",";
-                            fazVirgula = true;
-                            mensagemInicial += id;
-                        }
-                        if (!fazVirgula)
-                            mensagemInicial = "0";
-                    }
-                    clientes.get(clientes.size() - 1).println(mensagemInicial);
+                    clientesIdentifiers.add(conexao.getInetAddress().getHostAddress() + ":" + conexao.getPort());
+                    broadcastUsuariosOnline();
                 }
-
-                clientesIdentifiers.add(conexao.getInetAddress().getHostAddress() + ":" + conexao.getPort());
 
                 // Cria uma nova thread para o cliente
                 ClienteHandler handler = new ClienteHandler(conexao);
@@ -114,12 +120,13 @@ public class ServidorTCP implements Runnable {
                 } catch (IOException e) {
                     System.out.println("Erro ao fechar a conexão: " + e.getMessage());
                 }
-                //Remove o cliente da Lista de IDs
-                clientesIdentifiers.remove(clientId);
-
-                // Remove o cliente da lista de clientes
                 synchronized (clientes) {
-                    clientes.remove(saida);
+                    int idx = clientesIdentifiers.indexOf(clientId);
+                    if (idx >= 0) {
+                        clientesIdentifiers.remove(idx);
+                        clientes.remove(idx);
+                        new ServidorTCP().broadcastUsuariosOnline();
+                    }
                 }
                 System.out.println("Cliente desconectado: " + conexao.getInetAddress().getHostAddress());
             }
