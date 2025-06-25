@@ -6,18 +6,19 @@ public class Cliente {
     private static String servidor = "localhost"; // Endereço do servidor
     private static int portaServidorTCP = 6789; // Porta do servidorTCP
     private static int portaServidorUDP = 9876; // Porta do servidorUDP
-    private static int portaClienteTCP = 5390;
 
     public static void main(String[] args) throws Exception {
 
+        Socket socket = new Socket();
+        socket.bind(new InetSocketAddress(InetAddress.getLocalHost(), 0));
         // Fluxo de entrada Input de usuário
         BufferedReader entradaTeclado = new BufferedReader(new InputStreamReader(System.in));
 
         System.out.print("Digite o seu nome de usuário: ");
-        sendMessageUDP("1\u001F" + entradaTeclado.readLine() + "\u001F" + InetAddress.getLocalHost().getHostAddress() +":"+ portaClienteTCP + "\u001F");
+        sendMessageUDP("1\u001F" + entradaTeclado.readLine() + "\u001F" + InetAddress.getLocalHost().getHostAddress() +":"+ socket.getLocalPort() + "\u001F");
 
         // Conecta-se ao servidor
-        Socket socket = new Socket(servidor, portaServidorTCP, InetAddress.getLocalHost(), portaClienteTCP);
+        socket.connect(new InetSocketAddress(servidor, portaServidorTCP));
         System.out.println("Conectado ao servidor: " + servidor);
 
         // Cria os fluxos de entrada e saída do servidor TCP
