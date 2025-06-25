@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.Color;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.TimeoutException;
@@ -43,7 +44,7 @@ public class ClienteController {
             model.setUsuario(usuario);
             model.setConectado(true);
             view.getStatusLabel().setText("Conectado como: " + usuario);
-            view.getStatusLabel().setForeground(new java.awt.Color(0, 128, 0));
+            view.getStatusLabel().setForeground(Color.WHITE);
             view.getConectarButton().setEnabled(false);
             view.getUsuarioField().setEnabled(false);
             view.habilitarEnvioMensagem(true); // Habilita painel de mensagem
