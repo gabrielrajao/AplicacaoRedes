@@ -18,7 +18,7 @@ public class Cliente {
         sendMessageUDP("1\u001F" + entradaTeclado.readLine() + "\u001F" + InetAddress.getLocalHost().getHostAddress() +":"+ socket.getLocalPort() + "\u001F");
 
         // Conecta-se ao servidor
-        socket.connect(new InetSocketAddress(servidor, portaServidorTCP));
+        socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), portaServidorTCP));
         System.out.println("Conectado ao servidor: " + servidor);
 
         // Cria os fluxos de entrada e saída do servidor TCP
